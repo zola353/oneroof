@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ዋን ሩፍ ሪልስቴት ንግድ እና አፓርትመንት | ሙሉ የአክሲዮን ክትትል ስርዓት</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, 'Noto Sans Ethiopic', sans-serif; }
+        body { background: linear-gradient(145deg, #eef2f0 0%, #dde4e0 100%); min-height: 100vh; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,25,20,0.96); backdrop-filter: blur(12px); z-index: 2000; display: flex; justify-content: center; align-items: center; }
+        .login-card { background: white; border-radius: 2rem; width: 500px; padding: 2.5rem 2rem; text-align: center; box-shadow: 0 30px 50px rgba(0,0,0,0.3); border-top: 6px solid #d4af37; }
+        .login-card h2 { color: #0f2b1d; margin: 1rem 0 0.5rem; }
+        .scrolling-title { overflow: hidden; white-space: nowrap; background: #fef7e0; padding: 0.7rem; border-radius: 40px; margin-bottom: 1rem; }
+        .scrolling-title span { display: inline-block; animation: scrollText 20s linear infinite; font-weight: bold; color: #b85c00; }
+        @keyframes scrollText { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        .user-type { display: flex; flex-wrap: wrap; gap: 0.8rem; margin: 1.8rem 0; justify-content: center; }
+        .user-type button { flex: 1; padding: 0.6rem 0.8rem; border-radius: 40px; border: 2px solid #e2e8f0; background: white; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .user-type button.active { background: #0f2b1d; border-color: #d4af37; color: #d4af37; }
+        .pwd-wrapper { position: relative; margin: 1rem 0; }
+        .pwd-wrapper input { width: 100%; padding: 0.9rem 1rem; border-radius: 50px; border: 2px solid #e0e6e3; outline: none; font-size: 1rem; }
+        .toggle-eye { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: #d4af37; background: white; padding-left: 0.5rem; }
+        .login-btn { background: linear-gradient(95deg, #0f2b1d, #1e4a33); color: #d4af37; width: 100%; padding: 0.9rem; border: none; border-radius: 50px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        .login-btn:hover { transform: translateY(-2px); }
+        .main-content { display: none; }
+        .top-bar { background: #0f2b1d; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 3px solid #d4af37; }
+        .badge-admin, .badge-superadmin, .badge-subadmin, .badge-member { background: #d4af37; color: #0f2b1d; padding: 0.3rem 1rem; border-radius: 30px; font-weight: bold; font-size: 0.8rem; }
+        .badge-superadmin { background: #9b59b6; color: white; }
+        .badge-subadmin { background: #2c7da0; color: white; }
+        .badge-member { background: #27ae60; color: white; }
+        .tab-bar { background: white; display: flex; justify-content: center; gap: 0.8rem; padding: 0.8rem; flex-wrap: wrap; border-bottom: 1px solid #e2ece6; }
+        .tab-btn { background: #f0f5f2; border: none; padding: 0.5rem 1.2rem; border-radius: 40px; font-weight: 600; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; color: #1a4a2f; transition: all 0.2s; font-size: 0.85rem; }
+        .tab-btn.active { background: #0f2b1d; color: #d4af37; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .container { max-width: 1400px; margin: 1.5rem auto; padding: 0 1rem; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: white; border-radius: 24px; padding: 1.2rem; margin-bottom: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.05); border-left: 5px solid #d4af37; transition: box-shadow 0.2s; position: relative; }
+        .card:hover { box-shadow: 0 12px 28px rgba(0,0,0,0.08); }
+        .admin-filter { background: #f8faf9; padding: 0.8rem; border-radius: 20px; margin-bottom: 1rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem; }
+        input, select, button { border-radius: 40px; padding: 0.5rem 0.8rem; border: 1px solid #cfdfd7; font-size: 0.85rem; outline: none; }
+        input:focus, select:focus { border-color: #d4af37; box-shadow: 0 0 0 2px rgba(212,175,55,0.2); }
+        .btn-sm { background: #0f2b1d; border: none; color: #d4af37; padding: 0.4rem 1rem; border-radius: 40px; font-weight: bold; cursor: pointer; transition: 0.2s; display: inline-flex; gap: 5px; align-items: center; font-size: 0.8rem; }
+        .btn-sm:hover { background: #1e4a33; transform: translateY(-1px); }
+        .btn-danger { background: #c0392b; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-warning { background: #e67e22; color: white; }
+        .btn-primary { background: #2980b9; color: white; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; overflow-x: auto; display: block; margin-top: 10px; }
+        .data-table th { background: #0f2b1d; color: #d4af37; padding: 0.6rem; text-align: left; }
+        .data-table td { padding: 0.5rem 0.6rem; border-bottom: 1px solid #e9f0ec; color: #1f2f28; }
+        .member-payment-card { background: linear-gradient(135deg, #1e2a24, #0f2b1d); color: white; text-align: center; border-left: 5px solid #d4af37; }
+        .member-fee-card { background: linear-gradient(135deg, #fef9e7, #fdf2e9); color: #1f2f28; border-left: 5px solid #e67e22; padding: 1.2rem; border-radius: 24px; margin-bottom: 1.5rem; box-shadow: 0 6px 18px rgba(0,0,0,0.04); }
+        .payment-amount { font-size: 2.5rem; font-weight: bold; color: #d4af37; margin: 0.3rem 0; }
+        .timer-display { background: rgba(255,255,255,0.1); padding: 0.8rem; border-radius: 40px; font-size: 1rem; font-weight: bold; margin-top: 0.8rem; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .analysis-stats { display: flex; flex-wrap: wrap; gap: 15px; margin: 15px 0; }
+        .analysis-item { background: #fff; border-radius: 16px; padding: 10px; flex: 1; min-width: 160px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; border: 1px solid #ff9800; color: #1f2f28; }
+        .collapsible-header { cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
+        .collapsible-content { display: none; padding-top: 12px; }
+        .collapsible-content.show { display: block; }
+        .toast { position: fixed; bottom: 2rem; right: 2rem; background: #0f2b1d; color: #d4af37; padding: 0.8rem 1.5rem; border-radius: 50px; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .toast.show { opacity: 1; }
+        .footer { background: #0f2b1d; color: #b0cfbf; text-align: center; padding: 1rem; margin-top: 2rem; border-top: 2px solid #d4af37; font-size: 0.8rem; }
+        @media (max-width: 768px) { .tab-btn { font-size: 0.7rem; padding: 0.4rem 0.8rem; } .data-table th, .data-table td { padding: 0.3rem; font-size: 0.7rem; } .payment-amount { font-size: 1.8rem; } }
+        .member-stat-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 1rem; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 3000; display: none; justify-content: center; align-items: center; }
+        .modal-content { background: white; border-radius: 20px; padding: 20px; max-width: 700px; width: 95%; max-height: 80vh; overflow-y: auto; }
+        .green-bold { font-weight: 600; }
+        
+        /* ማተሚያ ዋተር ማርክ ስታይል */
+        .print-watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-35deg);
+            font-size: 3.5rem;
+            color: rgba(15, 43, 29, 0.08);
+            font-weight: bold;
+            white-space: nowrap;
+            z-index: -1000;
+            pointer-events: none;
+            display: none;
+            text-align: center;
+            font-family: sans-serif;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+            #printArea .print-watermark { display: block !important; }
+            .data-table th { background: #0f2b1d !important; color: #d4af37 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+        <div class="scrolling-title"><span><i class="fas fa-building"></i> ዋን ሩፍ ሪልስቴት ንግድ እና አፓርትመንት</span></div>
+        <h2><i class="fas fa-chart-line"></i> የአክሲዮን ክትትል ስርዓት</h2>
+        <p>🏢 አስተማማኝ የአባላት አስተዳደር</p>
+        <div class="user-type">
+            <button id="adminTypeBtn" class="active" onclick="setRole('admin')"><i class="fas fa-user-shield"></i> አድሚን</button>
+            <button id="superAdminTypeBtn" onclick="setRole('superAdmin')"><i class="fas fa-crown"></i> ሱፐር አድሚን</button>
+            <button id="subAdminTypeBtn" onclick="setRole('subAdmin')"><i class="fas fa-user-tie"></i> ሱብ አድሚን</button>
+            <button id="memberTypeBtn" onclick="setRole('member')"><i class="fas fa-users"></i> አባል</button>
+        </div>
+        <div class="pwd-wrapper"><input type="password" id="loginPass" placeholder="ፓስዎርድ / አይዲ"><i class="fas fa-eye toggle-eye" onclick="togglePass()"></i></div>
+        <button class="login-btn" onclick="handleLogin()"><i class="fas fa-sign-in-alt"></i> ይግቡ</button>
+        <div id="loginLoaderContainer" style="margin-top:1rem; display:none;"><i class="fas fa-spinner fa-pulse"></i> በመጫን ላይ...</div>
+        <div id="loginErrorMsg" style="color:#c0392b; margin-top:0.5rem;"></div>
+    </div>
+</div>
+
+<div id="printArea" style="display:none;"></div>
+
+<div id="modalOverlay" class="modal-overlay">
+    <div class="modal-content" id="modalContent"></div>
+</div>
+
+<div id="mainApp" class="main-content">
+    <div class="top-bar">
+        <div><span id="userBadge" class="badge-admin">አድሚን</span></div>
+        <div><button class="btn-sm btn-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ውጣ</button></div>
+    </div>
+    <div class="marquee-wrapper" style="background:#fff3cd; padding:0.5rem; overflow:hidden;"><div class="marquee-content" id="movingAnnounce">📢 ማስታወቂያ የለም</div></div>
+    
+    <div id="memberPaymentNoticeCard" class="card member-payment-card" style="display:none;">
+        <h4><i class="fas fa-exclamation-circle"></i> የክፍያ ማሳወቂያ እና ቀሪ ጊዜ</h4>
+        <div class="payment-amount" id="memberMonthlyPaymentAmount">0.00 ብር</div>
+        <small id="memberNoticeTypeLabel">መደበኛ ወርሃዊ መዋጮ</small>
+        <div class="timer-display"><i class="fas fa-hourglass-half"></i> <span id="timerCountdown">-- ቀን -- ሰዓት -- ደቂቃ -- ሰከንድ</span></div>
+    </div>
+    
+    <div id="memberFeeExpectedCard" class="member-fee-card" style="display:none;">
+        <h4 style="color:#e67e22; margin-bottom:8px;"><i class="fas fa-wallet"></i> የሚጠበቁ ልዩ ክፍያዎች እና ቅጣቶች መግለጫ</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:center;">
+            <div style="background:white; padding:10px; border-radius:15px; border:1px solid #fadbd8;">
+                <span style="font-size:0.85rem; color:#7f8c8d;">የሚጠበቅ ቅጣት ድምር</span>
+                <div style="font-size:1.4rem; font-weight:bold; color:#c0392b;" id="memberCardPenaltyExpected">0.00 ብር</div>
+            </div>
+            <div style="background:white; padding:10px; border-radius:15px; border:1px solid #d5f5e3;">
+                <span style="font-size:0.85rem; color:#7f8c8d;">የሚጠበቅ ስራ ማስኬጃ</span>
+                <div style="font-size:1.4rem; font-weight:bold; color:#27ae60;" id="memberCardWorkFeeExpected">0.00 ብር</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="memberPersonalPanel" class="card" style="display:none;">
+        <div class="member-stat-panel">
+            <div><h3 id="currentMemberName">-</h3><p>ኮድ: <span id="currentMemberId">-</span> | አክሲዮን: <span id="currentMemberShares">0</span></p><p>ስልክ: <span id="currentMemberPhone">-</span> | አድራሻ: <span id="currentMemberAddress">-</span></p></div>
+            <div><div>ጠቅላላ መዋጮ: <strong id="memberTotalContribution">0</strong> ብር</div><div>የሚጠበቅ: <strong id="memberExpected">0</strong> ብር</div><div>ቀሪ: <strong id="memberRemaining">0</strong> ብር</div></div>
+        </div>
+    </div>
+    
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="construction"><i class="fas fa-hard-hat"></i> ግንባታ</button>
+        <button class="tab-btn" data-tab="members"><i class="fas fa-users"></i> አባላት</button>
+        <button class="tab-btn" data-tab="reports"><i class="fas fa-chart-bar"></i> ሪፖርቶች እና ትንተና</button>
+        <button class="tab-btn" data-tab="admin_tools"><i class="fas fa-tools"></i> የአስተዳደር መሳሪያዎች</button>
+    </div>
+    
+    <div class="container">
+        <div id="constructionPane" class="tab-pane active">
+            <div class="card"><h3>ጠቅላላ የግንባታ ቁሳቁስ ወጪ ድምር፡ <span id="totalMaterialExpense">0</span> ብር</h3></div>
+            <div class="card admin-only">
+                <div class="collapsible-header" onclick="toggleNewPurchaseCard()"><h3><i class="fas fa-cart-plus"></i> አዲስ ዕቃ ግዥ</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="newPurchaseCardContent" class="collapsible-content">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;">
+                        <input type="text" id="newReceiptNo" placeholder="ተ.ቁጥር">
+                        <input type="date" id="newPurchaseDate">
+                        <select id="newMaterialCat" onchange="updateSubTypeOptions()">
+                            <option value="iron">ብረት</option>
+                            <option value="cement">ሲሚንቶ</option>
+                            <option value="nail">ሚስማር</option>
+                            <option value="gravel">ጠጠር</option>
+                            <option value="ash">አሸዋ</option>
+                            <option value="office">የቢሮ እቃ / ወጪ</option>
+                            <option value="others">ሌሎች</option>
+                        </select>
+                        <div id="subTypeContainer">
+                            <select id="newMaterialSubType">
+                                <option>8ሚሜ</option><option>10ሚሜ</option><option>12ሚሜ</option><option>14ሚሜ</option><option>16ሚሜ</option><option>18ሚሜ</option><option>20ሚሜ</option><option>22ሚሜ</option><option>24ሚሜ</option>
+                            </select>
+                        </div>
+                        <select id="newUnit">
+                            <option>ቁጥር</option><option>ቤርጋ</option><option>ኩንታል</option><option>ሜትር</option><option>ኪሎግራም</option><option>ኩብ ሜትር</option><option>ደስታ</option><option>ፓኬት</option><option>ወር</option><option>ሊትር</option><option>አበል</option>
+                        </select>
+                        <input type="number" id="newQuantity" placeholder="ብዛት">
+                        <input type="number" id="newPricePerUnit" placeholder="ዋጋ/አንድ">
+                        <input type="text" id="newSupplier" placeholder="አቅራቢ">
+                    </div>
+                    <button class="btn-sm btn-success" style="margin-top:10px;" onclick="addNewPurchase()">ግዥ መዝግብ</button>
+                </div>
+            </div>
+            
+            <div class="card admin-only">
+                <div class="collapsible-header" onclick="togglePurchaseReport()"><h3>የግንባታ ቁሳቁስ ካርድ (የግዥ ሪፖርት)</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="purchaseReportContent" class="collapsible-content">
+                    <div id="purchaseReportResults"></div>
+                    <div class="admin-filter" style="margin-top:10px;">
+                        <button class="btn-sm btn-warning" onclick="printCardSection('purchaseReportResults', 'የግንባታ ቁሳቁስ ግዥ ሪፖርት')">አትም</button>
+                        <button class="btn-sm btn-success" onclick="exportTableSectionToExcel('purchaseReportResults', 'የግንባታ_ቁሳቁስ_ሪፖርት')">Excel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card admin-only" id="contractorExpensesCard">
+                <div class="collapsible-header" onclick="toggleContractorExpenses()"><h3><i class="fas fa-handshake"></i> የኮንትራክተር ክፍያ እና መሰል ወጪዎች</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="contractorExpensesContent" class="collapsible-content">
+                    <div class="admin-filter">
+                        <input type="date" id="contractorDate">
+                        <select id="contractorType">
+                            <option value="contractor">ለኮንትራክተር የተከፈለ</option>
+                            <option value="consultant">ለአማካሪ የተከፈለ</option>
+                            <option value="engineer">ለማህንዲስ የተከፈለ</option>
+                        </select>
+                        <input type="number" id="contractorAmount" placeholder="ክፍያ መጠን (ብር)">
+                        <input type="text" id="contractorDescription" placeholder="ተጨማሪ ማብራሪያ...">
+                        <button class="btn-sm btn-success" onclick="addContractorPayment()">+ ወጪ መዝግብ</button>
+                    </div>
+                    <div id="contractorPaymentsList"></div>
+                    <div id="contractorTotalDisplay" style="font-weight:bold; margin-top:10px; color:#0f2b1d;"></div>
+                    <div class="admin-filter" style="margin-top:10px;">
+                        <button class="btn-sm btn-warning" onclick="printCardSection('contractorPaymentsList', 'የኮንትራክተር ክፍያ እና ወጪዎች ሪፖርት')">አትም</button>
+                        <button class="btn-sm btn-success" onclick="exportTableSectionToExcel('contractorPaymentsList', 'የኮንትራክተር_ወጪዎች')">Excel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="membersPane" class="tab-pane">
+            <div class="card admin-only" id="adminStatsCard" style="background:linear-gradient(95deg,#1a472a,#0b2b1a);color:white;">
+                <h3>አጠቃላይ ስታቲስቲክስ</h3>
+                <div>ጠቅላላ መዋጮ: <strong id="totalAllContrib">0</strong> ብር | አክሲዮን: <strong id="totalSharesAll">0</strong> | አባላት: <strong id="totalMembersCount">0</strong></div>
+                <div>የሚጠበቅ አጠቃላይ: <strong id="totalExpected">0</strong> ብር | ቀሪ ክፍያ: <strong id="totalRemaining">0</strong> ብር</div>
+            </div>
+            <div id="adminMemberListWrapper" class="card admin-only">
+                <div class="collapsible-header" onclick="toggleMemberList()"><h3>የአባላት ዝርዝር</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="memberListContent" class="collapsible-content">
+                    <div style="overflow-x:auto;" id="memberListTableContainer">
+                        <table class="data-table" id="memberListTable">
+                            <thead>
+                                <tr><th>ኮድ</th><th>ስም</th><th>አክሲዮን</th><th>የተከፈለ</th><th>ቀሪ</th><th>ድርጊት</th></tr>
+                            </thead>
+                            <tbody id="memberListTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="admin-filter" style="margin-top:10px;">
+                        <button class="btn-sm btn-warning" onclick="printCardSection('memberListTableContainer', 'የአባላት አጠቃላይ ዝርዝር መግለጫ')">አትም</button>
+                        <button class="btn-sm btn-success" onclick="exportTableSectionToExcel('memberListTableContainer', 'የአባላት_ዝርዝር')">Excel</button>
+                    </div>
+                </div>
+            </div>
+            <div id="adminMemberMgmt" class="card admin-only">
+                <div class="collapsible-header" onclick="toggleMemberMgmt()"><h3><i class="fas fa-users-gear"></i> አባላት መመዝገቢያ</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="memberMgmtContent" class="collapsible-content">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;">
+                        <input type="text" id="newMemberName" placeholder="ሙሉ ስም">
+                        <input type="text" id="newMemberPhone" placeholder="ስልክ (10 ዲጂት)">
+                        <input type="number" id="newMemberShares" placeholder="አክሲዮን" value="1">
+                        <input type="text" id="newMemberAddress" placeholder="አድራሻ">
+                        <select id="newMemberGender"><option>ወንድ</option><option>ሴት</option></select>
+                        <input type="text" id="newAssociationGivenName" placeholder="መጠሪያ">
+                    </div>
+                    <button class="btn-sm btn-success" style="margin-top:10px;" onclick="registerMember()">አባል ይመዝገቡ</button>
+                </div>
+            </div>
+            <div id="shareTransferCard" class="card admin-only">
+                <div class="collapsible-header" onclick="toggleShareTransferCard()"><h3><i class="fas fa-exchange-alt"></i> የአክሲዮን ማስተላለፊያ</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="shareTransferCardContent" class="collapsible-content">
+                    <div style="display:grid; gap:10px; margin-bottom:10px;">
+                        <label>አስተላላፊ: <select id="stTransferorSelect"></select></label>
+                        <label>እጣ: <input type="number" id="stSharesToTransfer" value="0"></label>
+                        <label>ለማን: <select id="stDestTypeSelect"><option value="existing">ነባር አባል</option><option value="new">አዲስ ገዢ</option></select></label>
+                    </div>
+                    <div id="stExistingDiv" style="margin-bottom:10px;"><label>ተላላፊ አባል: <select id="stExistingMemberSelect"></select></label></div>
+                    <div id="stNewDiv" style="display:none; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px; margin-bottom:10px;">
+                        <input type="text" id="stBuyerName" placeholder="ስም">
+                        <input type="text" id="stBuyerPhone" placeholder="ስልክ">
+                        <input type="text" id="stBuyerAddress" placeholder="አድራሻ">
+                    </div>
+                    <button class="btn-sm btn-success" onclick="saveShareTransfer()">ማስተላለፍ ይቅረጹ</button>
+                    <div id="shareTransferListContainer" style="margin-top:15px;"></div>
+                    <div class="admin-filter" style="margin-top:10px;">
+                        <button class="btn-sm btn-warning" onclick="printCardSection('shareTransferListContainer', 'የአክሲዮን ዝውውር መዝገብ ሪፖርት')">አትም</button>
+                        <button class="btn-sm btn-success" onclick="exportTableSectionToExcel('shareTransferListContainer', 'የአክሲዮን_ማስተላለፊያ_ሪፖርት')">Excel</button>
+                    </div>
+                </div>
+            </div>
+            <div id="adminContributionPanel" class="card admin-only">
+                <div class="collapsible-header" onclick="toggleAdminContributionPanel()"><h3><i class="fas fa-plus-circle"></i> መዋጮ መዝግብ</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="adminContributionContent" class="collapsible-content">
+                    <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:10px;">
+                        <select id="contributionMemberSelect"></select>
+                        <input type="date" id="contributionDate">
+                        <input type="number" id="contributionAmount" placeholder="መጠን">
+                        <input type="text" id="bankCodeInput" placeholder="ባንክ ኮድ">
+                        <div>
+                            <label><input type="radio" name="contributionType" value="regular" checked> መደበኛ</label>
+                            <label style="margin-left:10px;"><input type="radio" name="contributionType" value="special"> ልዩ</label>
+                        </div>
+                    </div>
+                    <button class="btn-sm btn-success" onclick="addContribution()">መዝግብ</button>
+                </div>
+            </div>
+            <div id="paymentNoticeCard" class="card admin-only">
+                <div class="collapsible-header" onclick="togglePaymentNoticeCard()"><h3><i class="fas fa-bell"></i> የክፍያ ማሳወቂያ መዝግብ (ታይመር ለአባላት)</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="paymentNoticeContent" class="collapsible-content">
+                    <div class="admin-filter">
+                        <label>አይነት: <select id="noticeContribType"><option value="regular">መደበኛ</option><option value="special">ልዩ</option></select></label>
+                        <label>መጠን: <input type="number" id="noticeAmount" value="0"></label>
+                        <label>የማስታወቂያ መጀመሪያ ቀን: <input type="datetime-local" id="noticeStartDateTime"></label>
+                        <button class="btn-sm btn-success" onclick="savePaymentNotice()">ማሳወቂያ መዝግብ</button>
+                    </div>
+                    <div id="paymentNoticeResults"></div>
+                </div>
+            </div>
+            <div class="card admin-only">
+                <div class="collapsible-header" onclick="toggleWorkPaymentCard()"><h3><i class="fas fa-tools"></i> የስራ ማስኪጃ እና ቅጣት መዝገብ</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="workPaymentContent" class="collapsible-content">
+                    <h4>ስራ ማስኬጃ መዝግብ</h4>
+                    <div class="admin-filter">
+                        <select id="workMemberSelect"></select>
+                        <input type="date" id="workDate">
+                        <input type="number" id="workSharesQuantity" placeholder="አክሲዮን ብዛት">
+                        <input type="number" id="workAmount" placeholder="መጠን">
+                        <input type="text" id="workBankCode" placeholder="ባንክ ኮድ">
+                        <button class="btn-sm btn-success" onclick="addWorkPayment()">መዝግብ</button>
+                    </div>
+                    <h4 style="margin-top:15px;">ቅጣት መዝግብ</h4>
+                    <div class="admin-filter">
+                        <select id="penaltyMemberSelect"></select>
+                        <input type="month" id="penaltyMonthInput">
+                        <select id="penaltyTypeSelect"><option value="regular">መደበኛ</option><option value="special">ልዩ</option></select>
+                        <input type="number" id="penaltyAmountInput" placeholder="ቅጣት መጠን">
+                        <button class="btn-sm btn-success" onclick="addMemberPenalty()">ቅጣት መዝግብ</button>
+                    </div>
+                    <div id="workCombinedPrintSection">
+                        <div id="workPaymentListContainer" style="margin-top:15px;"></div>
+                        <div id="memberPenaltiesList" style="margin-top:15px;"></div>
+                    </div>
+                    <div class="admin-filter" style="margin-top:10px;">
+                        <button class="btn-sm btn-warning" onclick="printCardSection('workCombinedPrintSection', 'የስራ ማስኬጃ እና የቅጣት መዛግብት ሪፖርት')">አትም</button>
+                        <button class="btn-sm btn-success" onclick="exportTableSectionToExcel('workCombinedPrintSection', 'የስራ_ማስኬጃ_እና_ቅጣቶች')">Excel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="reportsPane" class="tab-pane">
+            <div class="card">
+                <div class="collapsible-header" onclick="toggleSharePriceCard()"><h3><i class="fas fa-coins"></i> የአንድ አክሲዮን ዋጋ አወቃቀር</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="sharePriceContent" class="collapsible-content">
+                    <div class="admin-filter">
+                        <label>ወር: <input type="month" id="sharePriceMonth"></label>
+                        <label>ዋጋ (ብር): <input type="number" id="sharePriceInput" step="100" value="200000"></label>
+                        <button class="btn-sm btn-success" onclick="updateSharePrice()">አዘምን</button>
+                    </div>
+                    <div id="sharePriceDisplay" style="font-weight:bold; margin:10px 0;"></div>
+                    <div id="sharePriceHistoryTable"></div>
+                    <div class="admin-filter" style="margin-top:10px;">
+                        <button class="btn-sm btn-warning" onclick="printCardSection('sharePriceHistoryTable', 'የአክሲዮን ዋጋ ታሪክ ሪፖርት')">አትም</button>
+                        <button class="btn-sm btn-success" onclick="exportTableSectionToExcel('sharePriceHistoryTable', 'የአክሲዮን_ዋጋ_ታሪክ')">Excel</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="collapsible-header" onclick="toggleContributionReport()"><h3>የመዋጮ ሪፖርት እና ገበታ</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="contributionReportContent" class="collapsible-content">
+                    <div class="admin-filter">
+                        <input type="date" id="reportStartDate"> - <input type="date" id="reportEndDate">
+                        <button class="btn-sm" onclick="filterContributionReportAndChart()">አጣራ</button>
+                        <button class="btn-sm btn-success" onclick="exportTableSectionToExcel('reportResultsContainer', 'የመዋጮ_ሪፖርት')">Excel</button>
+                        <button class="btn-sm btn-warning" onclick="printCardSection('reportResultsContainer', 'የመዋጮ ታሪክ እና ፍሰት ሪፖርት')">አትም</button>
+                    </div>
+                    <div class="chart-container"><canvas id="contributionChart" style="max-height:300px;"></canvas></div>
+                    <div id="reportResultsContainer" style="margin-top:15px;"></div>
+                </div>
+            </div>
+            <div class="card admin-only">
+                <div class="collapsible-header" onclick="toggleMemberAnalysisCard()"><h3><i class="fas fa-chart-pie"></i> የአባላት ትንተና እስከ 10 አክሲዮን</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="memberAnalysisCardContent" class="collapsible-content">
+                    <div class="admin-filter">
+                        <span>ከቀን:</span><input type="date" id="memberAnalysisStartDate">
+                        <span>እስከ:</span><input type="date" id="memberAnalysisEndDate">
+                        <button class="btn-sm" onclick="renderMemberAnalysisExtended()">አሳይ</button>
+                    </div>
+                    <div id="memberAnalysisCombined">
+                        <div id="memberAnalysisSocietySummary"></div>
+                        <div id="memberAnalysisSharesContainer"></div>
+                        <div id="memberDetailList"></div>
+                    </div>
+                    <div class="admin-filter" style="margin-top:10px;">
+                        <button class="btn-sm btn-warning" onclick="printCardSection('memberAnalysisCombined', 'የአባላት ስታቲስቲካዊ ትንተና ሪፖርት')">አትም</button>
+                        <button class="btn-sm btn-success" onclick="exportTableSectionToExcel('memberAnalysisCombined', 'የአባላት_ትንተና_ሪፖርት')">Excel</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card admin-only">
+                <div class="collapsible-header" onclick="toggleRemainingFilter()"><h3><i class="fas fa-filter"></i> ማጣሪያ (ቀሪ ክፍያ)</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="remainingFilterContent" class="collapsible-content">
+                    <div class="admin-filter">
+                        <label>ዝቅተኛ ቀሪ (≥): <input type="number" id="remainingFilterAmount" value="0"></label>
+                        <button class="btn-sm" onclick="applyRemainingFilter()">አጣራ</button>
+                        <button class="btn-sm btn-warning" onclick="printCardSection('remainingFilterResults', 'ቀሪ ክፍያ ያለባቸው አባላት ሪፖርት')">አትም</button>
+                        <button class="btn-sm btn-success" onclick="exportTableSectionToExcel('remainingFilterResults', 'የቀሪ_ክፍያ_ማጣሪያ')">Excel</button>
+                    </div>
+                    <div id="remainingFilterResults"></div>
+                </div>
+            </div>
+            <div class="card admin-only">
+                <div class="collapsible-header" onclick="toggleSeparatedList()"><h3>የተሰናበቱ አባላት ዝርዝር</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="separatedListContent" class="collapsible-content">
+                    <div id="separatedListContainer"></div>
+                    <div class="admin-filter" style="margin-top:10px;">
+                        <button class="btn-sm btn-warning" onclick="printCardSection('separatedListContainer', 'የተሰናበቱ እና የወጡ አባላት ዝርዝር')">አትም</button>
+                        <button class="btn-sm btn-success" onclick="exportTableSectionToExcel('separatedListContainer', 'የተሰናበቱ_አባላት')">Excel</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card admin-only">
+                <div class="collapsible-header" onclick="toggleDefaulters()"><h3>ያልከፈሉ አባላት እና ትንተና</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="defaultersContent" class="collapsible-content">
+                    <div class="admin-filter">
+                        <input type="month" id="defaulterMonth">
+                        <select id="defaulterContributionType">
+                            <option value="regular">መደበኛ</option>
+                            <option value="special">ልዩ</option>
+                            <option value="both">ሁለቱንም</option>
+                        </select>
+                        <button class="btn-sm" onclick="showDefaulters()">አሳይ</button>
+                        <button class="btn-sm btn-warning" onclick="printCardSection('defaultersResults', 'ክፍያ ያላጠናቀቁ/ያልከፈሉ አባላት ትንተና')">አትም</button>
+                        <button class="btn-sm btn-success" onclick="exportTableSectionToExcel('defaultersResults', 'ያልከፈሉ_አባላት_ሪፖርት')">Excel</button>
+                    </div>
+                    <div id="defaultersResults"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="admin_toolsPane" class="tab-pane">
+            <div class="card admin-only">
+                <div class="collapsible-header" onclick="toggleAnnouncements()"><h3><i class="fas fa-bullhorn"></i> ማስታወቂያ</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="announcementsContent" class="collapsible-content">
+                    <div style="display:flex; gap:10px; margin-bottom:10px;"><input type="text" id="newAnnounceText" placeholder="ማስታወቂያ ይጻፉ (አገናኝም ይቻላል)" style="flex:1;"><button class="btn-sm btn-success" onclick="addAnnouncement()">+ ጨምር</button></div>
+                    <div id="announcementList"></div>
+                    <div class="admin-filter" style="margin-top:10px;">
+                        <button class="btn-sm btn-warning" onclick="printCardSection('announcementList', 'የድርጅቱ ማስታወቂያዎች መዝገብ')">አትም</button>
+                        <button class="btn-sm btn-success" onclick="exportTableSectionToExcel('announcementList', 'የማስታወቂያዎች_ዝርዝር')">Excel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card admin-only" id="systemBackupCard">
+                <div class="collapsible-header"><h3><i class="fas fa-database"></i> ሲስተም ባክአፕ (የ7 ቀናት ጥበቃ)</h3></div>
+                <div style="padding:10px 0;">
+                    <p style="font-size:0.85rem; color:#555; margin-bottom:10px;">
+                        🛡️ የሲስተሙ መረጃ ደህንነት ለመጠበቅ በየ 7 ቀኑ አውቶማቲክ ባክአፕ ይሰራል። ከታች ያለውን ቁልፍ በመጫን አሁኑኑ ሙሉ የሲስተሙን መረጃ በፋይል መልክ መውሰድ ይችላሉ።
+                    </p>
+                    <div id="backupStatusLabel" style="font-weight:bold; color:#27ae60; margin-bottom:10px; font-size:0.85rem;">የመጨረሻ ባክአፕ፡ በቅርቡ ተከናውኗል</div>
+                    <button class="btn-sm btn-primary" onclick="downloadSystemBackup()"><i class="fas fa-download"></i> የሲስተም ባክአፕ አውርድ (.json)</button>
+                </div>
+            </div>
+
+            <div class="card admin-only" style="display:none;">
+                <div class="collapsible-header" onclick="toggleAdminMgmt()"><h3><i class="fas fa-users-cog"></i> የአድሚን አስተዳደር</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="adminMgmtContent" class="collapsible-content">
+                    <div class="admin-filter">
+                        <input type="text" id="newAdminName" placeholder="ስም">
+                        <input type="password" id="newAdminPassword" placeholder="ፓስዎርድ">
+                        <select id="newAdminRole">
+                            <option value="admin">ዋና አድሚን</option>
+                            <option value="subAdmin">ሱብ አድሚን</option>
+                        </select>
+                        <button class="btn-sm btn-success" onclick="addAdminUser()">+ አድሚን ጨምር</button>
+                    </div>
+                    <div id="adminsListContainer"></div>
+                </div>
+            </div>
+
+            <div class="card admin-only">
+                <div class="collapsible-header" onclick="toggleActivityLog()"><h3><i class="fas fa-history"></i> የእንቅስቃሴ መዝገብ (Log)</h3><i class="fas fa-chevron-down"></i></div>
+                <div id="activityLogContent" class="collapsible-content">
+                    <div class="admin-filter">
+                        <input type="date" id="logStartDate"> - <input type="date" id="logEndDate">
+                        <select id="logRoleFilter">
+                            <option value="all">ሁሉም ሚና</option>
+                            <option value="admin">አድሚን</option>
+                            <option value="superAdmin">ሱፐር አድሚን</option>
+                            <option value="subAdmin">ሱብ አድሚን</option>
+                        </select>
+                        <button class="btn-sm" onclick="filterActivityLog()">አጣራ</button>
+                        <button class="btn-sm btn-success" onclick="exportTableSectionToExcel('activityLogTable', 'የእንቅስቃሴ_መዝገብ')">Excel</button>
+                        <button class="btn-sm btn-danger" onclick="clearActivityLog()">ሁሉንም አጥፋ</button>
+                    </div>
+                    <div id="activityLogTable"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">ዋን ሩፍ ሪልስቴት ንግድ እና አፓርትመንት አክሲዮን መሀበር | ስልክ: 0583203839</div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+// Firebase Config
+const firebaseConfig = {
+    apiKey: "AIzaSyBO-0xasnwkoS8xyh4B-37L14krJQokxT0",
+    authDomain: "one-roof-f1490.firebaseapp.com",
+    databaseURL: "https://one-roof-f1490-default-rtdb.firebaseio.com",
+    projectId: "one-roof-f1490",
+    storageBucket: "one-roof-f1490.firebasestorage.app",
+    messagingSenderId: "19163314950",
+    appId: "1:19163314950:web:7d1ab372d1acfcb18ebc87",
+    measurementId: "G-FTZZYMW0CB"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Global variables
+let membersList = [], contributions = {}, shareTransfers = [], paymentNotices = [], announcements = [], workPayments = [], separatedMembers = [], contractorPayments = [], sharePriceHistory = [], memberPenalties = {}, adminsList = [], activityLogs = [];
+let currentUser = { role: "admin", memberId: null };
+let sharePrice = 200000;
+let timerInterval = null;
+let contributionChart = null;
+const materialTypes = ['iron','cement','nail','gravel','ash','office','others'];
+let materials = { iron: [], cement: [], nail: [], gravel: [], ash: [], office: [], others: [] };
+
+// ሰብ-አድሚን የመሰረዝ መብት ከ1 ሰዓት በኋላ የሚከለክል ፈንክሽን 
+function checkSubAdminDeletePermission(createdAtTimestamp) {
+    if (currentUser.role === 'subAdmin') {
+        const oneHourInMs = 60 * 60 * 1000;
+        if (Date.now() - createdAtTimestamp > oneHourInMs) {
+            alert("ሰብ አድሚን ከተመዘገበ ከ1 ሰዓት በላይ የቆየ መረጃ መሰረዝ አይችልም!");
+            return false;
+        }
+    }
+    return true;
+}
+
+window.togglePass = function(){
+    let input = document.getElementById('loginPass');
+    if(input.type==='password') input.type='text';
+    else input.type='password';
+};
+
+window.setRole = function(role){
+    currentUser.role = role;
+    document.querySelectorAll('.user-type button').forEach(b=>b.classList.remove('active'));
+    if(role==='admin') document.getElementById('adminTypeBtn').classList.add('active');
+    if(role==='superAdmin') document.getElementById('superAdminTypeBtn').classList.add('active');
+    if(role==='subAdmin') document.getElementById('subAdminTypeBtn').classList.add('active');
+    if(role==='member') document.getElementById('memberTypeBtn').classList.add('active');
+};
+
+window.handleLogin = async function(){
+    let pwd = document.getElementById('loginPass').value.trim();
+    if(!pwd) return alert("እባክዎ ፓስዎርድ ወይም አይዲ ያስገቡ");
+    document.getElementById('loginLoaderContainer').style.display='block';
+    document.getElementById('loginErrorMsg').innerHTML='';
+    
+    let role = currentUser.role;
+    if(role==='admin' || role==='superAdmin' || role==='subAdmin'){
+        if(role==='subAdmin' && pwd==='sub123'){
+            currentUser={ role:'subAdmin', memberId:null };
+            await loadAllData();
+            return;
+        }
+        if((role==='admin' || role==='superAdmin') && pwd==='admin123'){
+            currentUser={ role:(role==='superAdmin'?'superAdmin':'admin'), memberId:null };
+            await loadAllData();
+            return;
+        }
+        document.getElementById('loginLoaderContainer').style.display='none';
+        document.getElementById('loginErrorMsg').innerHTML='የአድሚን ፓስዎርድ ተሳስቷል';
+    } else {
+        let membersSnap = await db.ref('/members').once('value');
+        let allMembers = membersSnap.exists() ? (membersSnap.val().list || []) : [];
+        let found = allMembers.find(m=>m.id===pwd);
+        if(found){
+            membersList=allMembers;
+            currentUser={ role:'member', memberId:found.id };
+            await loadAllData();
+        } else {
+            document.getElementById('loginLoaderContainer').style.display='none';
+            document.getElementById('loginErrorMsg').innerHTML='የአባል አይዲ ተሳስቷል';
+        }
+    }
+};
+
+window.logout = function(){ location.reload(); };
+
+async function loadAllData(){
+    try {
+        const [membersSnap, contribSnap, noticesSnap, transfersSnap, constructionSnap, workSnap, penaltiesSnap, sepSnap, contractorSnap, priceHistSnap, announcementsSnap, adminsSnap, logsSnap] = await Promise.all([
+            db.ref('/members').once('value'), db.ref('/contributions').once('value'), db.ref('/paymentNotices').once('value'),
+            db.ref('/shareTransfers').once('value'), db.ref('/construction').once('value'), db.ref('/workPayments').once('value'),
+            db.ref('/memberPenalties').once('value'), db.ref('/separatedMembers').once('value'), db.ref('/contractorPayments').once('value'),
+            db.ref('/sharePriceHistory').once('value'), db.ref('/announcements').once('value'), db.ref('/admins').once('value'), db.ref('/activityLogs').once('value')
+        ]);
+        membersList = membersSnap.exists() ? (membersSnap.val().list || []) : [];
+        contributions = contribSnap.exists() ? contribSnap.val() : {};
+        paymentNotices = noticesSnap.exists() ? noticesSnap.val() : [];
+        shareTransfers = transfersSnap.exists() ? transfersSnap.val() : [];
+        let constr = constructionSnap.exists() ? constructionSnap.val() : {};
+        for(let cat of materialTypes) materials[cat] = constr[cat] || [];
+        workPayments = workSnap.exists() ? workSnap.val() : [];
+        memberPenalties = penaltiesSnap.exists() ? penaltiesSnap.val() : {};
+        separatedMembers = sepSnap.exists() ? sepSnap.val() : [];
+        contractorPayments = contractorSnap.exists() ? contractorSnap.val() : [];
+        sharePriceHistory = priceHistSnap.exists() ? priceHistSnap.val() : [];
+        announcements = announcementsSnap.exists() ? announcementsSnap.val() : [];
+        adminsList = adminsSnap.exists() ? (adminsSnap.val().list || []) : [];
+        activityLogs = logsSnap.exists() ? (logsSnap.val().list || []) : [];
+        
+        let settingsSnap = await db.ref('/settings/sharePrice').once('value');
+        if(settingsSnap.exists()) sharePrice = settingsSnap.val();
+
+        showAppUI();
+    } catch(e){
+        console.error(e);
+        document.getElementById('loginErrorMsg').innerHTML = "ውሂብ መጫን አልተቻለም";
+    } finally {
+        document.getElementById('loginLoaderContainer').style.display='none';
+    }
+}
+
+function showAppUI(){
+    if(currentUser.role === 'member'){
+        document.getElementById('memberPersonalPanel').style.display = 'block';
+        document.getElementById('memberPaymentNoticeCard').style.display = 'block';
+        document.getElementById('memberFeeExpectedCard').style.display = 'block'; // አዲሱ ካርድ እንዲታይ
+        document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
+        document.querySelectorAll('.superadmin-only').forEach(el=>el.style.display='none');
+        document.getElementById('userBadge').innerHTML = "አባል";
+        
+        let m = membersList.find(x=>x.id===currentUser.memberId);
+        if(m){
+            document.getElementById('currentMemberName').innerText = m.name;
+            document.getElementById('currentMemberId').innerText = m.id;
+            document.getElementById('currentMemberShares').innerText = m.shares;
+            document.getElementById('currentMemberPhone').innerText = m.phone;
+            document.getElementById('currentMemberAddress').innerText = m.address;
+            let paid = getPaidTotalForMember(m.id);
+            let exp = m.shares * sharePrice;
+            document.getElementById('memberTotalContribution').innerText = paid.toLocaleString();
+            document.getElementById('memberExpected').innerText = exp.toLocaleString();
+            document.getElementById('memberRemaining').innerText = (exp - paid).toLocaleString();
+            
+            // የቅጣት እና ስራ ማስኬጃ መረጃዎችን ወደ አዲሱ ራሱን የቻለ ካርድ ማሳያ ማስተላለፍ
+            let expectedFees = calculateExpectedPenaltiesAndFees(m.id);
+            document.getElementById('memberCardPenaltyExpected').innerText = formatDecimal(expectedFees.penalty) + " ብር";
+            document.getElementById('memberCardWorkFeeExpected').innerText = formatDecimal(expectedFees.workFee) + " ብር";
+        }
+        updateMemberPaymentNotice();
+    } else {
+        document.getElementById('memberPaymentNoticeCard').style.display = 'none';
+        document.getElementById('memberPersonalPanel').style.display = 'none';
+        document.getElementById('memberFeeExpectedCard').style.display = 'none';
+        document.querySelectorAll('.admin-only').forEach(el=>el.style.display='block');
+        let badgeText = currentUser.role==='superAdmin' ? 'ሱፐር አድሚን' : (currentUser.role==='subAdmin' ? 'ሱብ አድሚን' : 'አድሚን');
+        document.getElementById('userBadge').innerHTML = badgeText;
+        renderAdminsList();
+        renderActivityLog();
+        checkAndTriggerWeeklyBackup(); // የ7 ቀን ባክአፕ ፍተሻ
+    }
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    applyOverduePenaltiesAndFees();
+    renderAll();
+}
+
+function renderAll(){
+    renderMemberListTable();
+    updateStats();
+    renderShareTransferList();
+    renderConstructionSummary();
+    renderWorkPaymentList();
+    renderMemberPenaltiesList();
+    renderSeparatedList();
+    renderContractorPayments();
+    filterContributionReportAndChart();
+    renderMemberAnalysisExtended();
+    updateAnnounceUI();
+    
+    // Update selectors
+    let sel = document.getElementById('contributionMemberSelect');
+    if(sel) sel.innerHTML = '<option value="">አባል ምረጥ</option>'+membersList.map(m=>`<option value="${m.id}">${m.id} - ${m.name}</option>`).join('');
+    let transferorSel = document.getElementById('stTransferorSelect');
+    if(transferorSel) transferorSel.innerHTML = '<option value="">-- አስተላላፊ --</option>'+membersList.map(m=>`<option value="${m.id}">${m.id} - ${m.name}</option>`).join('');
+    let existingSel = document.getElementById('stExistingMemberSelect');
+    if(existingSel) existingSel.innerHTML = '<option value="">-- ተላላፊ --</option>'+membersList.map(m=>`<option value="${m.id}">${m.id} - ${m.name}</option>`).join('');
+    let workSel = document.getElementById('workMemberSelect');
+    if(workSel) workSel.innerHTML = '<option value="">-- አባል --</option>'+membersList.map(m=>`<option value="${m.id}">${m.id} - ${m.name}</option>`).join('');
+    let penaltySel = document.getElementById('penaltyMemberSelect');
+    if(penaltySel) penaltySel.innerHTML = '<option value="">-- አባል --</option>'+membersList.map(m=>`<option value="${m.id}">${m.id} - ${m.name}</option>`).join('');
+}
+
+// 🟢 የተመረጠውን ክፍል (Card Section) ብቻ በድርጅቱ ዋተር ማርክ የማተም ብልህ ፈንክሽን
+window.printCardSection = function(elementId, reportTitle) {
+    let contentHtml = document.getElementById(elementId).innerHTML;
+    let printArea = document.getElementById('printArea');
+    
+    // የድርጅት ስም የያዘ የውሃ ምልክት (Watermark HTML) ማዘጋጀት
+    let watermarkHtml = `<div class="print-watermark">ዋን ሩፍ ሪልስቴት ንግድ እና አፓርትመንት</div>`;
+    
+    printArea.innerHTML = `
+        <div style="padding:20px; position:relative; min-height:100vh;">
+            ${watermarkHtml}
+            <div style="text-align:center; margin-bottom:20px; border-bottom:3px solid #0f2b1d; padding-bottom:10px;">
+                <h1 style="color:#0f2b1d; margin-bottom:5px;">ዋን ሩፍ ሪልስቴት ንግድ እና አፓርትመንት</h1>
+                <h3 style="color:#d4af37; margin-top:0;">${reportTitle}</h3>
+                <small>የታተመበት ቀን፡ ${new Date().toLocaleString()}</small>
+            </div>
+            <div>${contentHtml}</div>
+        </div>
+    `;
+    window.print();
+};
+
+// 🟢 ከማስገደጃ alert ወጥቶ በቀጥታ ወደ እውነተኛ ኤክሴል ሪፖርት የሚቀይር ፈንክሽን
+window.exportTableSectionToExcel = function(elementId, fileName) {
+    let container = document.getElementById(elementId);
+    let table = container.querySelector('table');
+    
+    // በክፍሉ ውስጥ ቴብል ከሌለ ከይዘቱ ጊዜያዊ ቴብል መፍጠር
+    if (!table) {
+        alert("በዚህ ክፍል ውስጥ የሚላክ የሰንጠረዥ መረጃ የለም!");
+        return;
+    }
+    
+    let wb = XLSX.utils.table_to_book(table, { sheet: "ሪፖርት" });
+    XLSX.writeFile(wb, `${fileName}_${new Date().toISOString().slice(0,10)}.xlsx`);
+    showToast("የኤክሴል ፋይል በተሳካ ሁኔታ ተዘጋጅቷል!");
+};
+
+// 🟢 የ7 ቀን አውቶማቲክ ባክአፕ መቆጣጠሪያ
+function checkAndTriggerWeeklyBackup() {
+    let lastBackup = localStorage.getItem('one_roof_last_backup_time');
+    let now = Date.now();
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+    
+    if (!lastBackup || (now - parseInt(lastBackup) > sevenDaysInMs)) {
+        // የ7 ቀን የጊዜ ገደብ ሲያልፍ ባክአፕ በስተጀርባ ዝግጁ ማድረግ
+        localStorage.setItem('one_roof_last_backup_time', now.toString());
+        document.getElementById('backupStatusLabel').innerText = "የመጨረሻ ባክአፕ፡ ዛሬ በራስ-ሰር ተከናውኗል (የ7 ቀን ጥበቃ)";
+    }
+}
+
+window.downloadSystemBackup = function() {
+    let backupData = {
+        members: membersList,
+        contributions: contributions,
+        paymentNotices: paymentNotices,
+        shareTransfers: shareTransfers,
+        materials: materials,
+        workPayments: workPayments,
+        memberPenalties: memberPenalties,
+        separatedMembers: separatedMembers,
+        contractorPayments: contractorPayments,
+        sharePriceHistory: sharePriceHistory,
+        announcements: announcements,
+        backupTimestamp: new Date().toISOString()
+    };
+    
+    let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+    let downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `One_Roof_System_Backup_${new Date().toISOString().slice(0,10)}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    logActivity('system_backup_download', 'አድሚኑ ሙሉ የሲስተም ባክአፕ አውርዷል');
+    showToast("ባክአፕ ፋይል በተሳካ ሁኔታ ወርዷል!");
+};
+
+function generateId(){ return "M-"+Math.floor(100+Math.random()*900); }
+
+function getPaidTotalForMember(mid){
+    return (contributions[mid]||[]).reduce((acc,c)=>acc+(c.amount||0),0);
+}
+
+function getRemainingForMember(m){
+    return (m.shares * sharePrice) - getPaidTotalForMember(m.id);
+}
+
+function updateStats(){
+    let totalContrib = 0;
+    for(let mid in contributions) totalContrib += getPaidTotalForMember(mid);
+    let totalShares = membersList.reduce((acc,m)=>acc+parseInt(m.shares||0),0);
+    let expected = totalShares * sharePrice;
+    
+    let tCount = document.getElementById('totalMembersCount'); if(tCount) tCount.innerText = membersList.length;
+    let tAll = document.getElementById('totalAllContrib'); if(tAll) tAll.innerText = totalContrib.toLocaleString();
+    let tSh = document.getElementById('totalSharesAll'); if(tSh) tSh.innerText = totalShares;
+    let tExp = document.getElementById('totalExpected'); if(tExp) tExp.innerText = expected.toLocaleString();
+    let tRem = document.getElementById('totalRemaining'); if(tRem) tRem.innerText = (expected - totalContrib).toLocaleString();
+}
+
+window.registerMember = function(){
+    let name = document.getElementById('newMemberName').value.trim();
+    let phone = document.getElementById('newMemberPhone').value.trim();
+    let shares = parseInt(document.getElementById('newMemberShares').value)||1;
+    let address = document.getElementById('newMemberAddress').value.trim();
+    let gender = document.getElementById('newMemberGender').value;
+    let assocName = document.getElementById('newAssociationGivenName').value.trim();
+    
+    if(!name || !phone) return alert("እባክዎ ስም እና ስልክ ያስገቡ");
+    let id = generateId();
+    let member = { id, name, phone, address, gender, shares, associationGivenName: assocName, shareholderStatus:'founder', status:'active', createdAt:Date.now() };
+    
+    membersList.push(member);
+    db.ref('/members').set({ list: membersList }).then(()=>{
+        showToast(`አባል ተመዝግቧል! ኮድ: ${id}`);
+        document.getElementById('newMemberName').value='';
+        document.getElementById('newMemberPhone').value='';
+        renderAll();
+        logActivity('register_member', `${member.id} - ${member.name}`);
+    });
+};
+
+window.addContribution = function(){
+    let memberId = document.getElementById('contributionMemberSelect').value;
+    if(!memberId) return alert("አባል ይምረጡ");
+    let date = document.getElementById('contributionDate').value;
+    if(!date) return alert("ቀን ይምረጡ");
+    let amount = parseFloat(document.getElementById('contributionAmount').value);
+    if(isNaN(amount)||amount<=0) return alert("ትክክለኛ መጠን ያስገቡ");
+    let bankCode = document.getElementById('bankCodeInput').value.trim()||'-';
+    let type = document.querySelector('input[name="contributionType"]:checked')?.value||'regular';
+    let receiptNo = "RCP-"+Math.floor(Math.random()*10000);
+    
+    if(!contributions[memberId]) contributions[memberId]=[];
+    contributions[memberId].push({ receiptNo, date, month:date.slice(0,7), type, bankCode, amount, createdAt:Date.now() });
+    
+    db.ref('/contributions').set(contributions).then(()=>{
+        showToast("መዋጮ ተመዝግቧል");
+        document.getElementById('contributionAmount').value='';
+        document.getElementById('bankCodeInput').value='';
+        renderAll();
+        logActivity('add_contribution', `${memberId} - ${amount} ብር (${type})`);
+    });
+};
+
+window.deleteContribution = function(mid, idx) {
+    let item = contributions[mid][idx];
+    if(!checkSubAdminDeletePermission(item.createdAt || Date.now())) return;
+    
+    if(confirm("ይህንን መዋጮ መሰረዝ ይፈልጋሉ?")){
+        contributions[mid].splice(idx,1);
+        if(contributions[mid].length===0) delete contributions[mid];
+        db.ref('/contributions').set(contributions);
+        filterContributionReportAndChart();
+        updateStats();
+        showToast("ተሰርዟል");
+        logActivity('delete_contribution', `${mid} - index ${idx}`);
+    }
+};
+
+window.saveShareTransfer = function(){
+    let transferorId = document.getElementById('stTransferorSelect').value;
+    if(!transferorId) return alert("አስተላላፊ ይምረጡ");
+    let shares = parseInt(document.getElementById('stSharesToTransfer').value);
+    if(shares<=0) return alert("የሚተላለፍ እጣ ያስገቡ");
+    
+    let transferor = membersList.find(m=>m.id===transferorId);
+    if(!transferor || transferor.shares < shares) return alert("በቂ አክሲዮን የለውም");
+    
+    let destType = document.getElementById('stDestTypeSelect').value;
+    let transfereeId = null;
+    let transfereeName = "";
+    
+    if(destType === 'existing'){
+        transereeId = document.getElementById('stExistingMemberSelect').value;
+        if(!transereeId) return alert("ተላላፊ አባል ይምረጡ");
+        let destM = membersList.find(m=>m.id===transereeId);
+        destM.shares += shares;
+        transereeName = destM.name;
+    } else {
+        let bName = document.getElementById('stBuyerName').value.trim();
+        let bPhone = document.getElementById('stBuyerPhone').value.trim();
+        let bAddr = document.getElementById('stBuyerAddress').value.trim();
+        if(!bName) return alert("የአዲስ ገዢ ስም ያስገቡ");
+        transereeId = generateId();
+        transereeName = bName;
+        membersList.push({ id:transereeId, name:bName, phone:bPhone, address:bAddr, shares:shares, status:'active', createdAt:Date.now() });
+    }
+    
+    transferor.shares -= shares;
+    shareTransfers.push({ id:"TR-"+Date.now(), transferorId, transferorName:transferor.name, transfereeId, transfereeName, shares, date:new Date().toISOString().slice(0,10), createdAt:Date.now() });
+    
+    db.ref('/members').set({ list: membersList });
+    db.ref('/shareTransfers').set(shareTransfers).then(()=>{
+        showToast("የአክሲዮን ዝውውር ተጠናቋል");
+        renderAll();
+    });
+};
+
+window.addNewPurchase = function(){
+    let cat = document.getElementById('newMaterialCat').value;
+    let receipt = document.getElementById('newReceiptNo').value || "REC-"+Date.now();
+    let date = document.getElementById('newPurchaseDate').value;
+    let type = document.getElementById('newMaterialSubType').value;
+    let unit = document.getElementById('newUnit').value;
+    let qty = parseFloat(document.getElementById('newQuantity').value)||0;
+    let price = parseFloat(document.getElementById('newPricePerUnit').value)||0;
+    let supplier = document.getElementById('newSupplier').value;
+    
+    if(!date || qty<=0 || price<=0) return alert("ቀን፣ ብዛት እና ዋጋ ያስገቡ");
+    let total = qty*price;
+    
+    if(!materials[cat]) materials[cat]=[];
+    materials[cat].push({ receiptNo:receipt, date, type, quantity:qty, unit, pricePerUnit:price, total, supplier, createdAt:Date.now() });
+    
+    db.ref('/construction').set(materials).then(()=>{
+        showToast("ግዥ ተመዝግቧል");
+        renderConstructionSummary();
+    });
+};
+
+function renderConstructionSummary(){
+    let total = 0;
+    for(let cat of materialTypes) {
+        for(let i of (materials[cat]||[])) total += i.total||0;
+    }
+    document.getElementById('totalMaterialExpense').innerText = total.toLocaleString();
+    
+    let resultsDiv = document.getElementById('purchaseReportResults');
+    if(!resultsDiv) return;
+    
+    let html = `<table class="data-table"><thead><tr><th>ተ.ቁጥር</th><th>ዓይነት</th><th>ዝርዝር</th><th>ብዛት</th><th>ዋጋ</th><th>ጠቅላላ</th><th>ድርጊት</th></tr></thead><tbody>`;
+    for(let cat of materialTypes){
+        for(let idx=0; idx<(materials[cat]||[]).length; idx++){
+            let item = materials[cat][idx];
+            html += `<tr><td>${item.receiptNo}</td><td>${cat}</td><td>${item.type}</td><td>${item.quantity} ${item.unit}</td><td>${item.pricePerUnit}</td><td>${item.total}</td><td><button class="btn-sm btn-danger" onclick="deletePurchase('${cat}',${idx})">X</button></td></tr>`;
+        }
+    }
+    html += `</tbody></table>`;
+    resultsDiv.innerHTML = html;
+}
+
+window.deletePurchase = function(cat, idx) {
+    let item = materials[cat][idx];
+    if(!checkSubAdminDeletePermission(item.createdAt || Date.now())) return;
+    
+    if(confirm("ይህንን የግዥ መዝገብ መሰረዝ ይፈልጋሉ?")){
+        materials[cat].splice(idx,1);
+        db.ref('/construction').set(materials).then(()=>{
+            renderConstructionSummary();
+            showToast("ግዥ ተሰርዟል");
+        });
+    }
+};
+
+window.addContractorPayment = function(){
+    let date = document.getElementById('contractorDate').value;
+    let type = document.getElementById('contractorType').value;
+    let amount = parseFloat(document.getElementById('contractorAmount').value);
+    let desc = document.getElementById('contractorDescription').value.trim();
+    
+    if(!date || isNaN(amount) || amount<=0) return alert("እባክዎ ቀን እና ትክክለኛ የክፍያ መጠን ያስገቡ");
+    
+    contractorPayments.push({ id:"CP-"+Date.now(), date, type, amount, description:desc, createdAt:Date.now() });
+    db.ref('/contractorPayments').set(contractorPayments).then(()=>{
+        showToast("የኮንትራክተር/አማካሪ ወጪ ተመዝግቧል");
+        document.getElementById('contractorAmount').value='';
+        document.getElementById('contractorDescription').value='';
+        renderContractorPayments();
+    });
+};
+
+function renderContractorPayments(){
+    let div = document.getElementById('contractorPaymentsList');
+    if(!div) return;
+    let total = 0;
+    let html = `<table class="data-table"><thead><tr><th>ቀን</th><th>የክፍያ ዓይነት</th><th>መጠን (ብር)</th><th>ማብራሪያ</th><th>ድርጊት</th></tr></thead><tbody>`;
+    contractorPayments.forEach((p, idx)=>{
+        total += p.amount;
+        let displayType = p.type==='contractor' ? 'ለኮንትራክተር የተከፈለ' : (p.type==='consultant' ? 'ለአማካሪ የተከፈለ' : 'ለማህንዲስ የተከፈለ');
+        html += `<tr><td>${p.date}</td><td>${displayType}</td><td>${p.amount.toLocaleString()} ብር</td><td>${p.description||'-'}</td><td><button class="btn-sm btn-danger" onclick="deleteContractorPayment(${idx})">X</button></td></tr>`;
+    });
+    html += `</tbody></table>`;
+    div.innerHTML = html;
+    document.getElementById('contractorTotalDisplay').innerText = `አጠቃላይ የኮንትራክተር እና መሰል ወጪዎች ድምር፡ ${total.toLocaleString()} ብር`;
+}
+
+window.deleteContractorPayment = function(idx) {
+    let item = contractorPayments[idx];
+    if(!checkSubAdminDeletePermission(item.createdAt || Date.now())) return;
+    
+    if(confirm("ይህንን ወጪ ሰርዝ?")){
+        contractorPayments.splice(idx,1);
+        db.ref('/contractorPayments').set(contractorPayments).then(()=>{
+            renderContractorPayments();
+            showToast("መዝገቡ ተሰርዟል");
+        });
+    }
+};
+
+window.addWorkPayment = function(){
+    let memberId = document.getElementById('workMemberSelect').value;
+    if(!memberId) return alert("አባል ይምረጡ");
+    let date = document.getElementById('workDate').value;
+    let shares = parseInt(document.getElementById('workSharesQuantity').value)||0;
+    let amount = parseFloat(document.getElementById('workAmount').value);
+    let bankCode = document.getElementById('workBankCode').value.trim();
+    if(!date || isNaN(amount) || amount<=0) return alert("ሙሉ መረጃ ያስገቡ");
+    
+    workPayments.push({ id:"WP-"+Date.now(), memberId, date, shares, amount, bankCode, createdAt:Date.now() });
+    db.ref('/workPayments').set(workPayments).then(()=>{
+        showToast("ስራ ማስኬጃ ተመዝግቧል");
+        renderWorkPaymentList();
+    });
+};
+
+function renderWorkPaymentList(){
+    let container = document.getElementById('workPaymentListContainer');
+    if(!container) return;
+    let html = `<h4>የተመዘገቡ ስራ ማስኬጃዎች</h4><table class="data-table"><thead><tr><th>አባል ኮድ</th><th>ቀን</th><th>አክሲዮን</th><th>መጠን</th><th>ድርጊት</th></tr></thead><tbody>`;
+    workPayments.forEach((w,idx)=>{
+        html += `<tr><td>${w.memberId}</td><td>${w.date}</td><td>${w.shares}</td><td>${w.amount}</td><td><button class="btn-sm btn-danger" onclick="deleteWorkPayment(${idx})">X</button></td></tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+
+window.deleteWorkPayment = function(idx) {
+    let item = workPayments[idx];
+    if(!checkSubAdminDeletePermission(item.createdAt || Date.now())) return;
+    if(confirm("ይህንን የስራ ማስኬጃ ሰርዝ?")){
+        workPayments.splice(idx,1);
+        db.ref('/workPayments').set(workPayments).then(()=>{
+            renderWorkPaymentList();
+        });
+    }
+};
+
+window.addMemberPenalty = function(){
+    let mid = document.getElementById('penaltyMemberSelect').value;
+    let month = document.getElementById('penaltyMonthInput').value;
+    let type = document.getElementById('penaltyTypeSelect').value;
+    let amount = parseFloat(document.getElementById('penaltyAmountInput').value);
+    if(!mid || !month || isNaN(amount)) return alert("ሁሉንም መረጃ ያስገቡ");
+    
+    if(!memberPenalties[mid]) memberPenalties[mid] = [];
+    memberPenalties[mid].push({ month, type, amount, createdAt:Date.now() });
+    db.ref('/memberPenalties').set(memberPenalties).then(()=>{
+        showToast("ቅጣት ተመዝግቧል");
+        renderMemberPenaltiesList();
+    });
+};
+
+function renderMemberPenaltiesList(){
+    let container = document.getElementById('memberPenaltiesList');
+    if(!container) return;
+    let html = `<h4>የአባላት ቅጣቶች ዝርዝር</h4><table class="data-table"><thead><tr><th>አባል</th><th>ወር</th><th>ዓይነት</th><th>መጠን</th><th>ድርጊት</th></tr></thead><tbody>`;
+    for(let mid in memberPenalties){
+        memberPenalties[mid].forEach((p,idx)=>{
+            html += `<tr><td>${mid}</td><td>${p.month}</td><td>${p.type}</td><td>${p.amount}</td><td><button class="btn-sm btn-danger" onclick="deletePenalty('${mid}',${idx})">X</button></td></tr>`;
+        });
+    }
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+
+window.deletePenalty = function(mid, idx) {
+    let item = memberPenalties[mid][idx];
+    if(!checkSubAdminDeletePermission(item.createdAt || Date.now())) return;
+    if(confirm("ቅጣቱን ሰርዝ?")){
+        memberPenalties[mid].splice(idx,1);
+        db.ref('/memberPenalties').set(memberPenalties).then(()=>{
+            renderMemberPenaltiesList();
+        });
+    }
+};
+
+window.savePaymentNotice = function(){
+    let type = document.getElementById('noticeContribType').value;
+    let amount = parseFloat(document.getElementById('noticeAmount').value)||0;
+    let startDateTime = document.getElementById('noticeStartDateTime').value;
+    if(amount<=0 || !startDateTime) return alert("እባክዎ ትክክለኛ መጠን እና ቀን ያስገቡ");
+    
+    let announcedAt = new Date();
+    let deadlineAt = new Date(new Date(startDateTime).getTime() + 15*24*60*60*1000);
+    
+    let notice = { id: Date.now()+'-'+Math.random().toString(36).substr(2,6), type, amount, startDateTime, announcedAt: announcedAt.toISOString(), deadlineAt: deadlineAt.toISOString() };
+    paymentNotices.push(notice);
+    
+    db.ref('/paymentNotices').set(paymentNotices).then(() => {
+        showToast(`የክፍያ ማሳወቂያ ታይመር ተመዝግቧል!`);
+        renderPaymentNoticeList();
+    });
+};
+
+function renderPaymentNoticeList() {
+    let container = document.getElementById('paymentNoticeResults');
+    if(container) container.innerHTML = paymentNotices.map((n,idx)=>`<div style='margin-top:5px;'>${n.type=='regular'?'መደበኛ':'ልዩ'} - ${n.amount} ብር - ገደብ: ${new Date(n.deadlineAt).toLocaleString()} <button class="btn-sm btn-danger" onclick="deletePaymentNotice(${idx})">ሰርዝ</button></div>`).join('');
+}
+
+window.deletePaymentNotice = function(idx){
+    paymentNotices.splice(idx,1);
+    db.ref('/paymentNotices').set(paymentNotices).then(()=>renderPaymentNoticeList());
+};
+
+window.updateSharePrice = function(){
+    let newPrice = parseFloat(document.getElementById('sharePriceInput').value);
+    if(isNaN(newPrice) || newPrice<=0) return alert("ትክክለኛ ዋጋ ያስገቡ");
+    sharePrice = newPrice;
+    let month = document.getElementById('sharePriceMonth').value || new Date().toISOString().slice(0,7);
+    sharePriceHistory.push({ date:new Date().toISOString().slice(0,10), month, price:newPrice });
+    db.ref('/settings/sharePrice').set(sharePrice);
+    db.ref('/sharePriceHistory').set(sharePriceHistory).then(()=>{
+        document.getElementById('sharePriceDisplay').innerHTML = `የአንድ አክሲዮን ዋጋ: ${sharePrice.toLocaleString()} ብር`;
+        showToast("የአክሲዮን ዋጋ ተዘምኗል");
+        renderAll();
+    });
+};
+
+window.filterContributionReportAndChart = function(){
+    let start = document.getElementById('reportStartDate').value;
+    let end = document.getElementById('reportEndDate').value;
+    let all = [];
+    for(let mid in contributions){
+        let member = membersList.find(m=>m.id===mid);
+        if(!member) continue;
+        contributions[mid].forEach((c,idx)=>{
+            if((!start || c.date>=start) && (!end || c.date<=end)){
+                all.push({ ...c, memberName:member.name, memberId:mid, contribIndex:idx });
+            }
+        });
+    }
+    let monthly = new Map();
+    all.forEach(c=>{ monthly.set(c.month, (monthly.get(c.month)||0)+c.amount); });
+    let sorted = Array.from(monthly.keys()).sort();
+    let canvas = document.getElementById('contributionChart');
+    if(!canvas) return;
+    if(contributionChart) contributionChart.destroy();
+    let ctx = canvas.getContext('2d');
+    contributionChart = new Chart(ctx, {
+        type:'bar',
+        data:{ labels:sorted, datasets:[{ label:'መዋጮ (ብር)', data:sorted.map(m=>monthly.get(m)), backgroundColor:'#d4af37' }] },
+        options:{ responsive:true }
+    });
+    let tableHtml = `<table class="data-table"><thead><tr><th>ቀን</th><th>አባል</th><th>ዓይነት</th><th>መጠን</th></tr></thead><tbody>${all.map((c)=>`<tr><td>${c.date}</td><td>${c.memberName}</td><td>${c.type=='regular'?'መደበኛ':'ልዩ'}</td><td>${c.amount.toLocaleString()}</td></tr>`).join('')}</tbody></table>`;
+    document.getElementById('reportResultsContainer').innerHTML = tableHtml;
+};
+
+window.applyRemainingFilter = function(){
+    let amt = parseFloat(document.getElementById('remainingFilterAmount').value)||0;
+    let filtered = membersList.filter(m=>getRemainingForMember(m)>=amt);
+    let html = `<table class="data-table"><thead><tr><th>ኮድ</th><th>ስም</th><th>አክሲዮን</th><th>ቀሪ ክፍያ</th></tr></thead><tbody>`;
+    filtered.forEach(m=>{
+        html += `<tr><td>${m.id}</td><td>${m.name}</td><td>${m.shares}</td><td>${getRemainingForMember(m).toLocaleString()}</td></tr>`;
+    });
+    html += `</tbody></table>`;
+    document.getElementById('remainingFilterResults').innerHTML = html;
+};
+
+window.addAnnouncement = function(){
+    let txt = document.getElementById('newAnnounceText').value.trim();
+    if(!txt) return alert("ማስታወቂያ ይጻፉ");
+    announcements.push({ id:Date.now(), content:txt, date:new Date().toISOString().slice(0,10) });
+    db.ref('/announcements').set(announcements).then(()=>{
+        document.getElementById('newAnnounceText').value='';
+        updateAnnounceUI();
+    });
+};
+
+function updateAnnounceUI(){
+    let list = document.getElementById('announcementList');
+    if(!list) return;
+    list.innerHTML = announcements.map(a=>`<div style='margin-bottom:5px;'>📢 ${a.content} <button class="btn-sm btn-danger" onclick="deleteAnnounce('${a.id}')">X</button></div>`).join('');
+    let marquee = document.getElementById('movingAnnounce');
+    if(marquee && announcements.length) marquee.innerHTML = "📢 " + announcements[announcements.length-1].content;
+}
+
+window.deleteAnnounce = function(id){
+    announcements = announcements.filter(a=>a.id!=id);
+    db.ref('/announcements').set(announcements).then(()=>updateAnnounceUI());
+};
+
+function renderMemberListTable(){
+    let tbody = document.getElementById('memberListTableBody');
+    if(!tbody) return;
+    tbody.innerHTML = membersList.map(m=>`<tr><td>${m.id}</td><td>${m.name}</td><td>${m.shares}</td><td>${getPaidTotalForMember(m.id).toLocaleString()}</td><td>${getRemainingForMember(m).toLocaleString()}</td><td><button class="btn-sm btn-danger" onclick="removeMember('${m.id}')">ሰርዝ</button></td></tr>`).join('');
+}
+
+window.removeMember = function(id){
+    if(confirm("አባሉን ሙሉ በሙሉ መሰረዝ ይፈልጋሉ?")){
+        membersList = membersList.filter(m=>m.id!==id);
+        db.ref('/members').set({ list: membersList }).then(()=>renderAll());
+    }
+};
+
+function updateMemberPaymentNotice() {
+    if (currentUser.role !== 'member') return;
+    const now = new Date();
+    const activeNotice = paymentNotices.find(n => n.deadlineAt && new Date(n.deadlineAt) > now);
+    const amountEl = document.getElementById('memberMonthlyPaymentAmount');
+    const typeLabel = document.getElementById('memberNoticeTypeLabel');
+    const timerEl = document.getElementById('timerCountdown');
+    
+    if (activeNotice) {
+        amountEl.innerHTML = activeNotice.amount.toLocaleString() + ' ብር';
+        typeLabel.innerHTML = activeNotice.type === 'regular' ? 'መደበኛ ወርሃዊ መዋጮ' : 'ልዩ ክፍያ መዋጮ';
+        
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            const diff = new Date(activeNotice.deadlineAt) - new Date();
+            if (diff <= 0) {
+                timerEl.innerHTML = "የክፍያ ጊዜ አልፏል!";
+                clearInterval(timerInterval);
+                return;
+            }
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const mins = Math.floor((diff / (1000 * 60)) % 60);
+            const secs = Math.floor((diff / 1000) % 60);
+            timerEl.innerHTML = `${days} ቀን ${hours} ሰዓት ${mins} ደቂቃ ${secs} ሰከንድ`;
+        }, 1000);
+    } else {
+        amountEl.innerHTML = "0.00 ብር";
+        typeLabel.innerHTML = "አዲስ ማሳወቂያ የለም";
+        timerEl.innerHTML = "-- ቀሪ ጊዜ የለም --";
+    }
+}
+
+function calculateExpectedPenaltiesAndFees(memberId) {
+    let totalPenalty = 0, totalWorkFee = 0;
+    const now = new Date();
+    const overdueNotices = paymentNotices.filter(n => n.deadlineAt && new Date(n.deadlineAt) < now);
+    
+    for (const notice of overdueNotices) {
+        const noticeMonth = notice.startDateTime ? notice.startDateTime.slice(0,7) : null;
+        if (!noticeMonth) continue;
+        const paid = (contributions[memberId] || []).some(c => c.type === notice.type && c.month === noticeMonth);
+        if (!paid) {
+            totalPenalty += notice.amount * 0.10;
+            totalWorkFee += 150;
+        }
+    }
+    // በእጅ የተመዘገቡ ቅጣቶችን መጨመር
+    if (memberPenalties[memberId]) {
+        totalPenalty += memberPenalties[memberId].reduce((sum, p) => sum + (p.amount || 0), 0);
+    }
+    // በእጅ የተመዘገቡ ስራ ማስኬጃዎችን መጨመር
+    let paidWork = workPayments.filter(w => w.memberId === memberId).reduce((sum, w) => sum + (w.amount || 0), 0);
+    
+    return { penalty: totalPenalty, workFee: Math.max(0, totalWorkFee - paidWork) };
+}
+
+function applyOverduePenaltiesAndFees() {}
+function renderShareTransferList() {}
+function renderSeparatedList() {}
+function renderMemberAnalysisExtended() {}
+function renderAdminsList() {}
+function renderActivityLog() {}
+function logActivity(action, details) {
+    activityLogs.push({ timestamp: Date.now(), userName: currentUser.role, role: currentUser.role, action, details });
+    db.ref('/activityLogs').set({ list: activityLogs });
+}
+function filterActivityLog() {}
+function clearActivityLog() {}
+function formatDecimal(v){ return parseFloat(v||0).toFixed(2); }
+
+function showToast(msg){
+    let t = document.getElementById('toast');
+    if(!t) return;
+    t.innerText = msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+// UI Toggles
+window.toggleNewPurchaseCard = function(){ document.getElementById('newPurchaseCardContent').classList.toggle('show'); };
+window.togglePurchaseReport = function(){ document.getElementById('purchaseReportContent').classList.toggle('show'); };
+window.toggleContractorExpenses = function(){ document.getElementById('contractorExpensesContent').classList.toggle('show'); };
+window.toggleMemberList = function(){ document.getElementById('memberListContent').classList.toggle('show'); };
+window.toggleMemberMgmt = function(){ document.getElementById('memberMgmtContent').classList.toggle('show'); };
+window.toggleShareTransferCard = function(){ document.getElementById('shareTransferCardContent').classList.toggle('show'); };
+window.toggleAdminContributionPanel = function(){ document.getElementById('adminContributionContent').classList.toggle('show'); };
+window.togglePaymentNoticeCard = function(){ document.getElementById('paymentNoticeContent').classList.toggle('show'); };
+window.toggleWorkPaymentCard = function(){ document.getElementById('workPaymentContent').classList.toggle('show'); };
+window.toggleSharePriceCard = function(){ document.getElementById('sharePriceContent').classList.toggle('show'); };
+window.toggleContributionReport = function(){ document.getElementById('contributionReportContent').classList.toggle('show'); };
+window.toggleMemberAnalysisCard = function(){ document.getElementById('memberAnalysisCardContent').classList.toggle('show'); };
+window.toggleRemainingFilter = function(){ document.getElementById('remainingFilterContent').classList.toggle('show'); };
+window.toggleSeparatedList = function(){ document.getElementById('separatedListContent').classList.toggle('show'); };
+window.toggleDefaulters = function(){ document.getElementById('defaultersContent').classList.toggle('show'); };
+window.toggleAnnouncements = function(){ document.getElementById('announcementsContent').classList.toggle('show'); };
+window.toggleActivityLog = function(){ document.getElementById('activityLogContent').classList.toggle('show'); };
+window.updateSubTypeOptions = function(){};
+
+// Tab toggles
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        let tab = btn.getAttribute('data-tab');
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        document.getElementById(tab+'Pane').classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    });
+});
+</script>
+</body>
+</html>
